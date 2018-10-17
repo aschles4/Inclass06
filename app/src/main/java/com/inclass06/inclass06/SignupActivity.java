@@ -1,8 +1,8 @@
 package com.inclass06.inclass06;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -15,55 +15,63 @@ import java.io.IOException;
 
 import okhttp3.Call;
 import okhttp3.Callback;
-import okhttp3.FormBody;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class MainActivity extends AppCompatActivity {
+public class SignupActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-
-        //login
-        findViewById(R.id.btn_login).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //Get user information
-                String email = ((TextView)findViewById(R.id.email)).getText().toString();
-                String pass = ((TextView)findViewById(R.id.password)).getText().toString();
-                //log user in
-                login(email, pass);
-            }
-        });
+        setContentView(R.layout.activity_sign_up);
 
         //signup
         findViewById(R.id.btn_signup).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //Get user information
+                String fname = ((TextView)findViewById(R.id.firstName)).getText().toString();
+                String lname = ((TextView)findViewById(R.id.lastName)).getText().toString();
+                String pass1 = ((TextView)findViewById(R.id.email)).getText().toString();
+                String pass2 = ((TextView)findViewById(R.id.password1)).getText().toString();
+                String email = ((TextView)findViewById(R.id.password2)).getText().toString();
+                //log user in
+                if (pass1.equals(pass2)) {
+                    signup(email, pass1, fname, lname);
+                }else{
+                    Toast.makeText(SignupActivity.this, "Passwords do not match!", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+
+        //cancel
+        findViewById(R.id.btn_cancel).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
                 //start up the signup page and finish main activity
-                Intent i = new Intent(MainActivity.this, SignupActivity.class);
-                startActivity(i);
+                Intent i = new Intent(SignupActivity.this, MainActivity.class);
                 finish();
+                startActivity(i);
             }
         });
     }
 
-    public void login(String email, String password){
+    public void signup(String email, String password, String fName, String lName){
         OkHttpClient client = new OkHttpClient();
 
-        RequestBody requestBody = new FormBody.Builder()
-                .add("email", email)
-                .add("password", password)
+        RequestBody requestBody = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("email", email)
+                .addFormDataPart("password", password)
+                .addFormDataPart("fname", fName)
+                .addFormDataPart("lname", lName)
                 .build();
 
         Request request = new Request.Builder()
-                .url("http://ec2-18-234-222-229.compute-1.amazonaws.com/api/login")
+                .url("http://ec2-18-234-222-229.compute-1.amazonaws.com/api/signup")
                 .post(requestBody)
                 .build();
 
@@ -77,16 +85,13 @@ public class MainActivity extends AppCompatActivity {
                     throw new IOException("Error response " + response);
                 }
 
-               LoginResponse resp = new Gson().fromJson(response.body().string(), new TypeToken<LoginResponse>(){}.getType());
-                Log.i("OKHTTP", resp.toString());
-                Log.d("main", "finished call");
+                LoginResponse resp = new Gson().fromJson(response.body().string(), new TypeToken<LoginResponse>(){}.getType());
                 if (resp != null) {
-                    Log.d("main", "resp not null");
-                    if (resp.status == "error"){
-                        Toast.makeText(MainActivity.this, resp.message, Toast.LENGTH_LONG).show();
+                    if (resp.status.equals("error")){
+                        Toast.makeText(SignupActivity.this, resp.message, Toast.LENGTH_LONG).show();
                     }else{
                         //send intent to message threads activity
-                        Intent i = new Intent(MainActivity.this, ThreadViewActivity.class);
+                        Intent i = new Intent(SignupActivity.this, ThreadViewActivity.class);
                         i.putExtra("token", resp.getToken());
                         i.putExtra("user_id", resp.getUser_id());
                         i.putExtra("user_email", resp.getUser_email());
@@ -97,11 +102,10 @@ public class MainActivity extends AppCompatActivity {
                         finish();
                         //finish this view
                     }
-                }else{
+                } else {
                     //if fail toast failed to login
-                    Toast.makeText(MainActivity.this, "Login Failed!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(SignupActivity.this, "Signup failed!", Toast.LENGTH_LONG).show();
                 }
-
             }
         });
     }

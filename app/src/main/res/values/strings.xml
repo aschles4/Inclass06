@@ -1,3 +1,14 @@
 <resources>
-    <string name="app_name">Inclass06</string>
+    <string name="app_name">InClassAssignment06</string>
+    <string name="firstname">First Name</string>
+    <string name="lastname">Last Name</string>
+    <string name="email">Email</string>
+    <string name="password1">Choose Password</string>
+    <string name="password2">Repeat Password</string>
+    <string name="cancel">Cancel</string>
+    <string name="signup">Sign Up</string>
+    <string name="title_activity__message_threads">activity_MessageThreads</string>
+    <string name="currentthreads">Current Threads</string>
+    <string name="add_thread">Add New Thread</string>
+    <string name="password">Password</string>
 </resources>
